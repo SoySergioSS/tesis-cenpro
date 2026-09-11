@@ -25,24 +25,24 @@ class ProyectoTesisController extends Controller
                     'delete' => ['POST'],
                 ],
             ],
-            'access' => [
-                'class' => \yii\filters\AccessControl::class,
-                'only' => ['index', 'view', 'create', 'update', 'delete'],
-                'rules' => [
-                    [
-                        // Permitir al alumno logueado solo ver el listado y el detalle
-                        'actions' => ['index', 'view'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                    ],
-                    [
-                        // Denegar explícitamente crear, editar y borrar (solo accesibles por Admin)
-                        'actions' => ['create', 'update', 'delete'],
-                        'allow' => false,
-                        'roles' => ['@'],
-                    ],
-                ],
-            ],
+//            'access' => [
+//                'class' => \yii\filters\AccessControl::class,
+//                'only' => ['index', 'view', 'create', 'update', 'delete'],
+//                'rules' => [
+//                    [
+//                        // Permitir al alumno logueado solo ver el listado y el detalle
+//                        'actions' => ['index', 'view'],
+//                        'allow' => true,
+//                        'roles' => ['@'],
+//                    ],
+//                    [
+//                        // Denegar explícitamente crear, editar y borrar (solo accesibles por Admin)
+//                        'actions' => ['create', 'update', 'delete'],
+//                        'allow' => false,
+//                        'roles' => ['@'],
+//                    ],
+//                ],
+//            ],
         ];
     }
 
@@ -108,7 +108,26 @@ class ProyectoTesisController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
+        if ($this->request->isPost) {
+            $loaded = $model->load($this->request->post());
+
+            if (!$loaded) {
+                echo "<h3>Fallo en load()</h3>";
+                echo "<p>Los datos enviados por POST no coinciden con el formName() de este modelo.</p>";
+                echo "<pre>";
+                print_r($this->request->post());
+                echo "</pre>";
+                die();
+            }
+
+            if (!$model->save()) {
+                echo "<h3>Fallo en save() - Errores de validación:</h3>";
+                echo "<pre>";
+                print_r($model->getErrors());
+                echo "</pre>";
+                die();
+            }
+
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
